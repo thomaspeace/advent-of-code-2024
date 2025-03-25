@@ -1,7 +1,7 @@
 """
 thinking:
-rather than having is_safe, we could re-check the level with element 'i + 1' removed
-the code should be refactored so that checking levels can be easily repeated
+it was easier to refactor and check every possible combination
+
 """
 
 
@@ -10,35 +10,42 @@ safe_count = 0
 
 with open("input.txt", "r") as file:
     for line in file:
-        level = []
-        level.append(line.strip())
-        levels += level
+        level = line.strip().split()
+        levels.append(level)
+
+
+# checks to see if it;s a valid difference, based on ascending or decending
+def is_difference_valid(prev, curr, ascending):
+    diff = int(curr) - int(prev)
+    if ascending:
+        return 1 <= diff <= 3
+    else:
+        return -3 <= diff <= -1
 
 
 def check_level_safety(level):
+    ascending = int(level[0]) < int(level[1])
 
-    ascending = False
-    if int(level[0]) < int(level[1]):
-        ascending = True
-    
-    is_safe = True
-    for i in range(0, len(level) - 1):
+    for i in range(len(level) - 1):
+        if not is_difference_valid(level[i], level[i + 1], ascending):
+            return False
+        
+    return True
 
-        if ascending:
-            if (int(level[i]) - int(level[i + 1])) < -3 or (int(level[i]) - int(level[i + 1])) >= 0:
-                is_safe = False
 
-        if not ascending:
-            if (int(level[i]) - int(level[i + 1])) > 3 or (int(level[i]) - int(level[i + 1])) <= 0:
-                is_safe = False
+def try_remove_element_and_check(level):
+    # remove one element and see if it's valid
+    for i in range(len(level)):
+        new_level = level[:i] + level[i+1:]
+        if check_level_safety(new_level):
+            return True
+    return False
 
-    return is_safe
-    
 
 for level in levels:
-    level = level.split()
-    if check_level_safety(level):
+    if check_level_safety(level) or try_remove_element_and_check(level):
         safe_count += 1
+
 
 print(safe_count)
 
